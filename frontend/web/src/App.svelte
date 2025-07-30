@@ -94,28 +94,20 @@
     <textarea
       bind:value={content}
       placeholder="Контент (Markdown поддерживается)"
-    ></textarea>
+    />
     <button on:click={addNote}>Добавить</button>
   </div>
 
   <div class="notes-list">
     {#each notes as note}
       <div class="note-preview">
-        <span class="note-title">{note.title}</span>
+        <div class="note-title" on:click={() => openModal(note)}>
+          <p>{note.title}</p>
+        </div>
         <div class="note-actions">
-          <button class="btn-small" on:click={() => openModal(note)}
-            >Показать</button
-          >
-          <button class="btn-small" on:click={() => copyContent(note.content)}
-            >Копировать</button
-          >
-          <button
-            class="btn-small"
-            on:click={() => {
-              openModal(note);
-              startEdit();
-            }}>Редактировать</button
-          >
+          <button class="btn-small" on:click={() => copyContent(note.content)}>
+            📋
+          </button>
         </div>
       </div>
     {/each}
@@ -123,29 +115,32 @@
 </main>
 
 {#if showModal && currentNote}
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="modal-overlay" on:click={closeModal}>
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="modal-content" on:click|stopPropagation>
       {#if isEditing}
-        <h2>Редактирование заметки</h2>
-        <input bind:value={editTitle} placeholder="Заголовок" />
-        <textarea bind:value={editContent} placeholder="Содержимое (Markdown)"
-        ></textarea>
-        <div class="modal-actions">
-          <button on:click={updateNote}>Сохранить</button>
-          <button on:click={() => (isEditing = false)}>Отмена</button>
+        <div class="modal-header">
+          <input bind:value={editTitle} placeholder="Заголовок" />
+          <div class="modal-actions">
+            <button on:click={() => copyContent(editContent)}>📋</button>
+            <button on:click={updateNote}>Сохранить</button>
+            <button on:click={() => (isEditing = false)}>Отмена</button>
+          </div>
         </div>
+        <textarea
+          class="note-body"
+          bind:value={editContent}
+          placeholder="Содержимое (Markdown)"
+        />
       {:else}
-        <h2>{currentNote.title}</h2>
-        <div class="modal-actions">
-          <button on:click={() => copyContent(currentNote.content)}
-            >Копировать</button
-          >
-          <button on:click={startEdit}>Редактировать</button>
-          <button on:click={closeModal}>Закрыть</button>
+        <div class="modal-header">
+          <h2>{currentNote.title}</h2>
+          <div class="modal-actions">
+            <button on:click={() => copyContent(currentNote.content)}>
+              📋
+            </button>
+            <button on:click={startEdit}>Редактировать</button>
+            <button on:click={closeModal}>Закрыть</button>
+          </div>
         </div>
         <div class="note-body">{@html marked(currentNote.content)}</div>
       {/if}
